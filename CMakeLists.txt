@@ -30,8 +30,8 @@ juce_add_plugin(NematicSoundLab
     VST3_CATEGORIES Instrument Synth)
 
 target_sources(NematicSoundLab PRIVATE
-    Source/PluginProcessor.cpp
-    Source/PluginEditor.cpp)
+    PluginProcessor.cpp
+    PluginEditor.cpp)
 
 target_compile_definitions(NematicSoundLab PUBLIC
     JUCE_WEB_BROWSER=0
