@@ -1,22 +1,45 @@
 NEMATIC SOUND LAB  -  plugin VST3 (instrumento) para FL Studio, Windows 64 bits
 
-COMO OBTENER EL .vst3 (sin instalar nada, ~10 min la primera vez)
-1. Entra a github.com (cuenta gratis) y crea un repositorio nuevo, por ejemplo "nematic-sound-lab".
-2. Sube TODO el contenido de esta carpeta (arrastrar y soltar en "uploading an existing file").
-   Importante: tiene que subirse tambien la carpeta oculta ".github".
-3. Anda a la pestaña "Actions": se va a estar compilando solo ("Build VST3 (Windows)").
-   Si no arranca, entra al workflow y toca "Run workflow".
-4. Cuando termine (tilde verde), abri esa ejecucion y abajo en "Artifacts" descarga "Nematic-Sound-Lab-VST3".
-5. Descomprimi el zip: adentro esta "Nematic Sound Lab.vst3".
+COMO OBTENER EL .vst3 (sin instalar nada)
+1. Entra al repositorio en github.com y abri la pestaña "Actions".
+2. Abri la ejecucion mas reciente ("Build VST3 (Windows)"). Tiene que tener el tilde verde (tarda unos 10 min).
+   Si no arranca sola, toca "Run workflow".
+3. Abajo, en "Artifacts", descarga "Nematic-Sound-Lab-VST3".
+4. Descomprimi el zip: adentro esta "Nematic Sound Lab.vst3".
 
 INSTALAR
 - Copia "Nematic Sound Lab.vst3" a:  C:\Program Files\Common Files\VST3
 - En FL Studio: Options > Manage plugins > Find installed plugins (con "Verify plugins" activado).
-- Lo vas a encontrar en el selector como instrumento (Nematic Sound Lab). Tocá notas MIDI.
+- Lo vas a encontrar como instrumento (Nematic Sound Lab). Toca notas MIDI.
 
-USO
-- Arriba: ATMOSFERA (ambient oscuro tipo Travis Scott) o ROMANTICO (reggaeton romantico actual).
-- Debajo: categorias (PAD, BASS, SYNTH, PLUCK, BELL, TEXTURE / KEYS) y los sonidos de cada una.
-- Flechas < > para pasar de sonido en sonido. Perillas: brillo, reso, ataque, release, detune, drive,
-  chorus, delay, reverb y volumen.
+QUE TRAE (300+ sonidos)
+- 4 secciones arriba:
+    ATMOSFERA  oscuro, espacial, envolvente (estilo Travis Scott / Don Toliver)
+    ROMANTICO  reggaeton romantico actual, calido y brillante (estilo Mora / Saiko / Tainy)
+    VERANO     tropical y soleado (estilo Un Verano Sin Ti)
+    SAMPLER    texturas hechas con granos de sonido (ver abajo)
+- Categorias: PAD, BASS (incluye 808), SYNTH, PLUCK, ARP, KEYS, MALLET, BELL, STRINGS, VOX, TEXTURE,
+  RISER, FX, y en SAMPLER: CLOUD, SHIMMER, DRONE, GLITCH.
+- Buscador: escribi "808", "pad", "bell"... y busca en todas las secciones.
+- Flechas < > para pasar de sonido en sonido.
+
+AJUSTAR UN SONIDO A TU GUSTO (panel SONIDO)
+  BRILLO, RESO, ATAQUE, DECAY, SUSTAIN, RELEASE, DETUNE, DRIVE, CHORUS, DELAY, REVERB, VOLUMEN.
+  Doble clic en una perilla = vuelve al valor original del preset.
+
+GRANULAR (panel de abajo)
+- Convierte un sample en texturas: nubes, brillos, drones, glitches.
+- Fuentes incluidas: Choir Air, Glass Bells, Warm Pad, Vinyl Dust, Rain Wash, Sub Drone, Tropical Pluck, Space Shimmer.
+- TU SAMPLE: toca "CARGAR SAMPLE" (o arrastra un .wav/.mp3/.flac al plugin) y usa tu propio audio.
+  El sample se recuerda dentro del proyecto de FL Studio (si moves el archivo de lugar, hay que cargarlo de nuevo).
+- Perillas: MEZCLA, POSICION (de donde se toma el sonido), AZAR POS, TAMANO y DENSIDAD de los granos,
+  TONO, DISPERSION, ESTEREO, REVERSA, RECORRIDO (el punto se mueve solo) y FORMA.
+- KEY: si esta prendido, las teclas cambian el tono; apagado, se toca la textura sin cambiar el tono.
+
+COLORES (panel de arriba a la derecha)
+- 4 temas listos (VIOLETA, ATARDECER, OCEANO, MENTA) y 4 barras para armar los tuyos
+  (principal, secundario, brillo y fondo). Se guardan con tu proyecto.
+
+NOTAS
 - Los bajos 808 son monofonicos con slide (glide): toca notas solapadas para deslizar.
+- Si algo no suena como esperabas, decime que sonido y lo ajusto.

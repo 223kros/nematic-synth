@@ -4,7 +4,16 @@
 #include <initializer_list>
 #include <utility>
 
-// Secciones: 0 = ATMOSFERA (ambient oscuro tipo Travis Scott), 1 = ROMANTICO (reggaeton romantico actual)
+// Secciones: 0 = ATMOSFERA (ambient oscuro tipo Travis Scott), 1 = ROMANTICO (reggaeton romantico actual),
+//            2 = VERANO (tropical, soleado), 3 = SAMPLER (texturas granulares)
+constexpr int kNumSections = 4;
+
+inline const char* sectionName (int s)
+{
+    static const char* n[kNumSections] = { "ATMOSFERA", "ROMANTICO", "VERANO", "SAMPLER" };
+    return n[s < 0 ? 0 : (s >= kNumSections ? kNumSections - 1 : s)];
+}
+
 struct Preset
 {
     const char* name;
@@ -28,10 +37,19 @@ inline Preset mk (int section, const char* cat, const char* name,
     return p;
 }
 
-inline const std::vector<Preset>& presets()
+// Atajos para escribir presets mas corto
+#define RV(m, s)         {"vMix",m}, {"vSize",s}
+#define DLY(m, t, f)     {"dMix",m}, {"dTime",t}, {"dFb",f}
+#define ENV(a, d, s, r)  {"aA",a}, {"aD",d}, {"aS",s}, {"aR",r}
+#define FEN(amt, a, d, s) {"fenv",amt}, {"fA",a}, {"fD",d}, {"fS",s}
+#define UNI(n, dt)       {"uni",n}, {"det",dt}, {"spread",1}
+#define FLT(c, r)        {"cutoff",c}, {"reso",r}
+
+// Los primeros presets (los originales) van primero para que los proyectos guardados sigan funcionando.
+inline std::vector<Preset> basePresets()
 {
     // w: 0 sine, 1 triangle, 2 saw, 3 square.  ftype: 0 LP, 1 BP, 2 HP
-    static const std::vector<Preset> list = {
+    std::vector<Preset> list = {
 
         // =====================  SECCION 0 : ATMOSFERA  =====================
         // ---- PAD
@@ -181,10 +199,46 @@ inline const std::vector<Preset>& presets()
     return list;
 }
 
+#include "Presets_Atmos.h"
+#include "Presets_Romantico.h"
+#include "Presets_Verano.h"
+#include "Presets_Sampler.h"
+
+#undef RV
+#undef DLY
+#undef ENV
+#undef FEN
+#undef UNI
+#undef FLT
+
+// Lista completa: originales + ampliacion
+inline const std::vector<Preset>& presets()
+{
+    static const std::vector<Preset> list = []
+    {
+        auto l = basePresets();
+        addAtmosPresets (l);
+        addRomanticoPresets (l);
+        addVeranoPresets (l);
+        addSamplerPresets (l);
+        return l;
+    }();
+    return list;
+}
+
+// Categorias de una seccion, en un orden fijo y agradable
 inline juce::StringArray categoriesFor (int section)
 {
-    juce::StringArray c;
+    static const char* order[] = { "PAD", "CLOUD", "SHIMMER", "BASS", "SYNTH", "PLUCK", "ARP", "KEYS", "MALLET", "BELL",
+                                   "STRINGS", "VOX", "DRONE", "TEXTURE", "GLITCH", "RISER", "FX" };
+    juce::StringArray present;
     for (const auto& p : presets())
-        if (p.section == section) c.addIfNotAlreadyThere (p.cat);
+        if (p.section == section) present.addIfNotAlreadyThere (p.cat);
+
+    juce::StringArray c;
+    for (auto* o : order)
+        if (present.contains (o)) c.add (o);
+    for (auto& s : present)
+        if (! c.contains (s)) c.add (s);
     return c;
 }

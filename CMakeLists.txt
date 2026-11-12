@@ -36,11 +36,17 @@ target_sources(NematicSoundLab PRIVATE
 target_compile_definitions(NematicSoundLab PUBLIC
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
+    JUCE_USE_MP3AUDIOFORMAT=1
     JUCE_VST3_CAN_REPLACE_VST2=0)
+
+if (MSVC)
+    target_compile_options(NematicSoundLab PRIVATE /utf-8)
+endif()
 
 target_link_libraries(NematicSoundLab
     PRIVATE
         juce::juce_audio_processors
+        juce::juce_audio_formats
         juce::juce_dsp
     PUBLIC
         juce::juce_recommended_config_flags

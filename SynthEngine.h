@@ -6,11 +6,15 @@
 #include <vector>
 #include <algorithm>
 #include "Params.h"
+#include "GranularSources.h"
 
 class NematicEngine
 {
 public:
     using Snap = std::array<float, P_COUNT>;
+
+    // Sample que usa la seccion granular (el procesador lo mantiene vivo mientras se renderiza).
+    void setSource (const SampleData* s) { src = s; }
 
     void prepare (double sr)
     {
@@ -42,6 +46,9 @@ public:
         lpL = lpR = 0.f;
         heldNotes.clear();
         bend = 0.f;
+        for (auto& v : voices) { for (auto& g : v.grains) g.on = false; v.gTimer = 0.0; }
+        crushL = crushR = 0.f;
+        crushCount = 0;
     }
 
     // ---- MIDI -------------------------------------------------------------
@@ -82,6 +89,12 @@ private:
         float pEnvVal = 0.f;
         juce::ADSR amp, flt;
         juce::dsp::StateVariableTPTFilter<float> filt;
+
+        // granos de la seccion granular
+        struct Grain { bool on = false; double pos = 0.0, inc = 1.0; int age = 0, len = 1; float gl = 1.f, gr = 1.f; };
+        static constexpr int kMaxGrains = 24;
+        std::array<Grain, kMaxGrains> grains;
+        double gTimer = 0.0, gScan = 0.0;
     };
 
     static float blep (float t, float dt)
@@ -130,6 +143,9 @@ private:
         v.phSub = 0.0;
         v.phMod = 0.0;
         v.pEnvVal = p[P_PENV];
+        for (auto& g : v.grains) g.on = false;
+        v.gTimer = 0.0;
+        v.gScan = 0.0;
         v.filt.reset();
         setEnv (v, p);
         v.amp.reset();
@@ -206,11 +222,19 @@ private:
         std::fill (tmpR, tmpR + n, 0.f);
 
         const float lfoInc = p[P_LFOR] / (float) sampleRate;
+        const int lfoShape = (int) std::round (p[P_LFOS]);
         for (int i = 0; i < n; ++i)
         {
             lfoPhase += lfoInc;
-            if (lfoPhase >= 1.f) lfoPhase -= 1.f;
-            lfoBuf[i] = std::sin (juce::MathConstants<float>::twoPi * lfoPhase);
+            if (lfoPhase >= 1.f) { lfoPhase -= 1.f; lfoHold = rng.nextFloat() * 2.f - 1.f; }
+            switch (lfoShape)
+            {
+                case 1:  lfoBuf[i] = 4.f * std::abs (lfoPhase - 0.5f) - 1.f; break;          // triangulo
+                case 2:  lfoBuf[i] = 1.f - 2.f * lfoPhase; break;                            // diente de sierra
+                case 3:  lfoBuf[i] = lfoPhase < 0.5f ? 1.f : -1.f; break;                    // cuadrada
+                case 4:  lfoBuf[i] = lfoHold; break;                                         // sample & hold
+                default: lfoBuf[i] = std::sin (juce::MathConstants<float>::twoPi * lfoPhase); break;
+            }
         }
 
         for (auto& v : voices)
@@ -267,11 +291,30 @@ private:
             std::fill (drBuf.begin(), drBuf.end(), 0.f);
         }
 
+        // lo-fi: baja la resolucion y la frecuencia de muestreo
+        if (p[P_LOFI] > 0.001f)
+        {
+            const int hold = 1 + (int) (p[P_LOFI] * 11.f);
+            const float steps = std::pow (2.f, 14.f - p[P_LOFI] * 9.f);
+            for (int i = 0; i < n; ++i)
+            {
+                if (crushCount <= 0)
+                {
+                    crushL = std::round (tmpL[i] * steps) / steps;
+                    crushR = std::round (tmpR[i] * steps) / steps;
+                    crushCount = hold;
+                }
+                --crushCount;
+                tmpL[i] = crushL;
+                tmpR[i] = crushR;
+            }
+        }
+
         // reverb
         {
             juce::Reverb::Parameters rp;
             rp.roomSize = p[P_VSIZE];
-            rp.damping = 0.45f;
+            rp.damping = p[P_VDAMP];
             rp.wetLevel = p[P_VMIX] * 0.33f;
             rp.dryLevel = 1.f - p[P_VMIX] * 0.35f;
             rp.width = 1.f;
@@ -311,6 +354,26 @@ private:
         v.filt.setResonance (0.707f + p[P_RESO] * 7.5f);
 
         const float velGain = 0.25f + 0.75f * v.vel;
+
+        // ---- preparacion granular ----
+        const int srcLen = src != nullptr ? src->length() : 0;
+        const bool useGran = p[P_GMIX] > 0.001f && srcLen > 64;
+        const float* d0 = nullptr; const float* d1 = nullptr;
+        double gInterval = 1000.0, scanInc = 0.0;
+        int gLen = 64;
+        float gNorm = 0.f, winF = 0.3f;
+        if (useGran)
+        {
+            d0 = src->buf.getReadPointer (0);
+            d1 = src->buf.getNumChannels() > 1 ? src->buf.getReadPointer (1) : d0;
+            const double sizeSec = (double) p[P_GSIZE] * 0.001;
+            gLen = std::max (32, (int) (sizeSec * sampleRate));
+            gInterval = sampleRate / (double) std::max (1.f, p[P_GDENS]);
+            const double srcSec = (double) srcLen / std::max (1.0, src->rate);
+            scanInc = (double) p[P_GSCAN] * 0.25 / (srcSec * sampleRate);
+            gNorm = p[P_GMIX] * 2.4f / std::sqrt (std::max (1.f, p[P_GDENS] * (float) sizeSec));
+            winF = 0.5f - 0.45f * p[P_GSHAPE];
+        }
 
         for (int i = 0; i < n; ++i)
         {
@@ -371,24 +434,83 @@ private:
                 sR += (rng.nextFloat() * 2.f - 1.f) * noiseLvl * 0.5f;
             }
 
+            if (useGran)
+            {
+                v.gScan += scanInc;
+                v.gTimer -= 1.0;
+                if (v.gTimer <= 0.0)
+                {
+                    v.gTimer += gInterval * (0.7 + 0.6 * rng.nextDouble());
+                    for (auto& gr : v.grains)
+                    {
+                        if (gr.on) continue;
+                        double frac = (double) p[P_GPOS] + v.gScan + (double) (rng.nextFloat() * 2.f - 1.f) * (double) p[P_GPOSR] * 0.5;
+                        frac -= std::floor (frac);
+                        const float semis = p[P_GPITCH] + (p[P_GKEY] > 0.5f ? (float) (v.note - 60) : 0.f)
+                                          + (rng.nextFloat() * 2.f - 1.f) * p[P_GSCAT] * 0.01f;
+                        double inc = (src->rate / sampleRate) * std::exp2 ((double) semis / 12.0);
+                        double start = frac * (double) (srcLen - 2);
+                        if (rng.nextFloat() < p[P_GREV])
+                        {
+                            inc = -inc;
+                            start = std::min ((double) (srcLen - 2), start + (double) gLen * -inc);
+                        }
+                        const float pn = (rng.nextFloat() * 2.f - 1.f) * p[P_GSPR];
+                        gr.on = true;
+                        gr.pos = start;
+                        gr.inc = inc;
+                        gr.age = 0;
+                        gr.len = gLen;
+                        gr.gl = std::sqrt (0.5f * (1.f - pn));
+                        gr.gr = std::sqrt (0.5f * (1.f + pn));
+                        break;
+                    }
+                }
+
+                float gl = 0.f, gr2 = 0.f;
+                for (auto& gr : v.grains)
+                {
+                    if (! gr.on) continue;
+                    const int i0 = (int) gr.pos;
+                    if (gr.pos < 0.0 || i0 >= srcLen - 1) { gr.on = false; continue; }
+                    const float fr = (float) (gr.pos - (double) i0);
+                    const float s0 = d0[i0] + (d0[i0 + 1] - d0[i0]) * fr;
+                    const float s1 = d1[i0] + (d1[i0 + 1] - d1[i0]) * fr;
+                    const float t = (float) gr.age / (float) gr.len;
+                    float w = 1.f;
+                    if (t < winF)            { w = std::sin (juce::MathConstants<float>::halfPi * t / winF); w *= w; }
+                    else if (t > 1.f - winF) { w = std::sin (juce::MathConstants<float>::halfPi * (1.f - t) / winF); w *= w; }
+                    gl += s0 * w * gr.gl;
+                    gr2 += s1 * w * gr.gr;
+                    gr.pos += gr.inc;
+                    if (++gr.age >= gr.len) gr.on = false;
+                }
+                sL += gl * gNorm;
+                sR += gr2 * gNorm;
+            }
+
             const float oct = p[P_FENV] * fE * 5.f + lfoBuf[i] * p[P_LFOC] * 2.f;
             v.filt.setCutoffFrequency (juce::jlimit (20.f, maxCut, p[P_CUTOFF] * std::exp2 (oct)));
             const float yL = v.filt.processSample (0, sL);
             const float yR = v.filt.processSample (1, sR);
 
-            const float g = aE * velGain * 0.5f;
+            const float trem = 1.f - p[P_LFOA] * 0.5f * (1.f - lfoBuf[i]);
+            const float g = aE * velGain * 0.5f * trem;
             tmpL[i] += yL * g;
             tmpR[i] += yR * g;
         }
     }
 
     double sampleRate = 44100.0;
-    std::array<Voice, 8> voices;
+    std::array<Voice, 10> voices;
     unsigned long long orderCounter = 0;
     std::vector<int> heldNotes;
     bool monoActive = false;
     float bend = 0.f;
-    float lfoPhase = 0.f;
+    float lfoPhase = 0.f, lfoHold = 0.f;
+    float crushL = 0.f, crushR = 0.f;
+    int crushCount = 0;
+    const SampleData* src = nullptr;
     juce::Random rng;
 
     float tmpL[kChunk] {}, tmpR[kChunk] {}, lfoBuf[kChunk] {};

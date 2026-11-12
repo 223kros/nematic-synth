@@ -33,8 +33,8 @@
     X(P_LFOC,  "lfoC",   "LFO Cutoff",  0.f,    1.f,     0.f,   0.f,   1.f)  \
     X(P_GLIDE, "glide",  "Glide",       0.f,    0.5f,    0.f,   0.f,   0.5f) \
     X(P_MONO,  "mono",   "Mono",        0.f,    1.f,     0.f,   1.f,   1.f)  \
-    X(P_PENV,  "pEnv",   "Pitch Env",   0.f,    48.f,    0.f,   0.f,   1.f)  \
-    X(P_PDEC,  "pDec",   "Pitch Decay", 0.005f, 1.f,     0.08f, 0.f,   0.4f) \
+    X(P_PENV,  "pEnv",   "Pitch Env",  -48.f,   48.f,    0.f,   0.f,   1.f)  \
+    X(P_PDEC,  "pDec",   "Pitch Decay", 0.005f, 6.f,     0.08f, 0.f,   0.4f) \
     X(P_DRIVE, "drive",  "Drive",       0.f,    1.f,     0.f,   0.f,   1.f)  \
     X(P_CHORUS,"chorus", "Chorus",      0.f,    1.f,     0.f,   0.f,   1.f)  \
     X(P_DMIX,  "dMix",   "Delay",       0.f,    1.f,     0.f,   0.f,   1.f)  \
@@ -42,6 +42,23 @@
     X(P_DFB,   "dFb",    "Delay Fdbk",  0.f,    0.9f,    0.35f, 0.f,   1.f)  \
     X(P_VMIX,  "vMix",   "Reverb",      0.f,    1.f,     0.15f, 0.f,   1.f)  \
     X(P_VSIZE, "vSize",  "Reverb Size", 0.f,    1.f,     0.5f,  0.f,   1.f)  \
+    X(P_VDAMP, "vDamp",  "Reverb Damp", 0.f,    1.f,     0.45f, 0.f,   1.f)  \
+    X(P_LFOS,  "lfoS",   "LFO Shape",   0.f,    4.f,     0.f,   1.f,   1.f)  \
+    X(P_LFOA,  "lfoA",   "LFO Tremolo", 0.f,    1.f,     0.f,   0.f,   1.f)  \
+    X(P_LOFI,  "lofi",   "Lo-Fi",       0.f,    1.f,     0.f,   0.f,   1.f)  \
+    X(P_GMIX,  "gMix",   "Granular Mix",0.f,    1.f,     0.f,   0.f,   1.f)  \
+    X(P_GSRC,  "gSrc",   "Granular Src",0.f,    8.f,     0.f,   1.f,   1.f)  \
+    X(P_GPOS,  "gPos",   "Grain Pos",   0.f,    1.f,     0.3f,  0.f,   1.f)  \
+    X(P_GPOSR, "gPosR",  "Grain PosRnd",0.f,    1.f,     0.1f,  0.f,   1.f)  \
+    X(P_GSIZE, "gSize",  "Grain Size",  10.f,   800.f,   120.f, 0.f,   0.4f) \
+    X(P_GDENS, "gDens",  "Grain Dens",  1.f,    120.f,   25.f,  0.f,   0.5f) \
+    X(P_GPITCH,"gPitch", "Grain Pitch",-24.f,   24.f,    0.f,   0.f,   1.f)  \
+    X(P_GSCAT, "gScat",  "Grain Scatter",0.f,   1200.f,  0.f,   0.f,   0.4f) \
+    X(P_GSPR,  "gSpr",   "Grain Spread",0.f,    1.f,     0.7f,  0.f,   1.f)  \
+    X(P_GREV,  "gRev",   "Grain Reverse",0.f,   1.f,     0.f,   0.f,   1.f)  \
+    X(P_GSCAN, "gScan",  "Grain Scan", -1.f,    1.f,     0.f,   0.f,   1.f)  \
+    X(P_GSHAPE,"gShape", "Grain Shape", 0.f,    1.f,     0.3f,  0.f,   1.f)  \
+    X(P_GKEY,  "gKey",   "Grain Keytrack",0.f,  1.f,     1.f,   1.f,   1.f)  \
     X(P_VOL,   "vol",    "Volume",      0.f,    1.f,     0.7f,  0.f,   1.f)
 
 enum ParamIdx
