@@ -26,7 +26,7 @@ juce_add_plugin(NematicSoundLab
     PLUGIN_MANUFACTURER_CODE Nmtc
     PLUGIN_CODE Nsl1
     FORMATS VST3
-    PRODUCT_NAME "Nematic Sound Lab"
+    PRODUCT_NAME "Vault"
     VST3_CATEGORIES Instrument Synth)
 
 target_sources(NematicSoundLab PRIVATE

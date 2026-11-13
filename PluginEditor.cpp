@@ -518,7 +518,7 @@ void NematicEditor::loadSampleFile (const File& f)
     }
     else
     {
-        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Nematic Sound Lab",
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Vault",
                                           "No se pudo leer ese archivo de audio. Proba con un .wav.");
     }
 }
@@ -615,10 +615,10 @@ void NematicEditor::paint (Graphics& g)
     // titulo
     g.setColour (Colours::white);
     g.setFont (Font (FontOptions (30.f, Font::bold)));
-    g.drawText ("NEMATIC", 24, 12, 260, 36, Justification::centredLeft);
+    g.drawText ("VAULT", 24, 12, 260, 36, Justification::centredLeft);
     g.setColour (pal.accC);
     g.setFont (Font (FontOptions (12.f, Font::bold)));
-    g.drawText ("SOUND LAB", 26, 46, 200, 16, Justification::centredLeft);
+    g.drawText ("SOUND LIBRARY", 26, 46, 200, 16, Justification::centredLeft);
 
     // nombre del preset actual
     const auto& list = presets();

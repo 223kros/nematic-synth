@@ -1,16 +1,16 @@
-NEMATIC SOUND LAB  -  plugin VST3 (instrumento) para FL Studio, Windows 64 bits
+VAULT  -  plugin VST3 (instrumento) para FL Studio, Windows 64 bits
 
 COMO OBTENER EL .vst3 (sin instalar nada)
 1. Entra al repositorio en github.com y abri la pestaña "Actions".
 2. Abri la ejecucion mas reciente ("Build VST3 (Windows)"). Tiene que tener el tilde verde (tarda unos 10 min).
    Si no arranca sola, toca "Run workflow".
-3. Abajo, en "Artifacts", descarga "Nematic-Sound-Lab-VST3".
-4. Descomprimi el zip: adentro esta "Nematic Sound Lab.vst3".
+3. Abajo, en "Artifacts", descarga "Vault-VST3".
+4. Descomprimi el zip: adentro esta "Vault.vst3".
 
 INSTALAR
-- Copia "Nematic Sound Lab.vst3" a:  C:\Program Files\Common Files\VST3
+- Copia "Vault.vst3" a:  C:\Program Files\Common Files\VST3
 - En FL Studio: Options > Manage plugins > Find installed plugins (con "Verify plugins" activado).
-- Lo vas a encontrar como instrumento (Nematic Sound Lab). Toca notas MIDI.
+- Lo vas a encontrar como instrumento (Vault). Toca notas MIDI.
 
 QUE TRAE (300+ sonidos)
 - 4 secciones arriba:
@@ -43,3 +43,6 @@ COLORES (panel de arriba a la derecha)
 NOTAS
 - Los bajos 808 son monofonicos con slide (glide): toca notas solapadas para deslizar.
 - Si algo no suena como esperabas, decime que sonido y lo ajusto.
+
+SI TENIAS LA VERSION ANTERIOR
+- Borra "Nematic Sound Lab.vst3" de C:\Program Files\Common Files\VST3 para que no quede duplicado.
